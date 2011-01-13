@@ -1,0 +1,30 @@
+CCSlider for cocos2d
+
+This is simple slider control for cocos2d.
+You can use easy!
+
+>>>>
+- (void) sliderMessage : (id)sender {
+	
+	CCSliderThumb *slider = (CCSliderThumb *)sender;
+	CCLOG(@"%f" , slider.value );
+}
+<<<<
+
+>>>>
+
+CCSlider *slider = [CCSlider sliderWithTarget:self selector:@selector(sliderMessage:)];
+slider.position = ccp( 200 , 200 );
+slider.liveDragging = YES;
+
+// You can use custom slider image.
+/*
+slider.thumb.selectedImage = [CCSprite spriteWithFile:@"slider_thumb.png"];
+slider.thumb.normalImage   = [CCSprite spriteWithFile:@"slider_thumb.png"];
+slider.barImage = [CCSprite spriteWithFile:@"slider_bar.png"];
+*/
+[self addChild:slider];
+<<<<
+
+Thanks
+http://www.mobile-bros.com/index.php?option=com_content&view=article&id=12:slider-in-cocos2d-iphone&catid=383:category-technical-articles&Itemid=3
