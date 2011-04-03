@@ -10,6 +10,11 @@
 #import "HelloWorldScene.h"
 #import "CCSlider.h"
 
+#define kTagSlider 0x1
+
+#define __CLIPPING_SLIDERBAR   // Use clipping sliderbar
+#define __TOUCH_END_SLIDERBAR  // Use touch end callback sliderbar
+
 // HelloWorld implementation
 @implementation HelloWorld
 
@@ -30,8 +35,21 @@
 
 - (void) sliderMessage : (id)sender {
 	
-	CCSliderThumb *slider = (CCSliderThumb *)sender;
-	CCLOG(@"%f" , slider.value );
+	CCSliderThumb *thumb = (CCSliderThumb *)sender;
+	CCLOG(@"%f" , thumb.value );
+    
+    CCNode *node = [self getChildByTag:kTagSlider];
+    CCSlider *slider = (CCSlider *)node;
+    
+#if defined (__CLIPPING_SLIDERBAR)
+    [slider clippingBar:CGSizeMake(thumb.value * slider.barImage.contentSize.width,
+                                   slider.barImage.contentSize.height)];
+#endif
+}
+
+- (void) sliderTouchEnd {
+    
+    CCLOG(@"sliderTouchEnd");
 }
 
 // on "init" you need to initialize your instance
@@ -49,13 +67,23 @@
 		slider.liveDragging = YES;
 		
 		// You can use custom image
-		/* sample code */
-		/*
-		slider.thumb.selectedImage = [CCSprite spriteWithFile:@"slider_thumb.png"];
-		slider.thumb.normalImage   = [CCSprite spriteWithFile:@"slider_thumb.png"];
-		slider.barImage = [CCSprite spriteWithFile:@"slider_bar.png"];
-		 */
+		/* --- This is sample code --- */
+		slider.thumb.selectedImage = [CCSprite spriteWithFile:@"thumb.png"];
+		slider.thumb.normalImage   = [CCSprite spriteWithFile:@"thumb.png"];
+        slider.thumb.contentSize   = slider.thumb.selectedImage.contentSize;
+        slider.thumb.contentSizeInPixels = slider.thumb.selectedImage.contentSizeInPixels;
+		slider.barImage = [CCSprite spriteWithFile:@"bar.png"];
+		/* --- This is sample code --- */
+        
 		[self addChild:slider];
+        slider.tag = kTagSlider;
+        
+        // If you use setTouchEndSelector method, 
+        // you can call specific selector when 
+        // you release your finger from the slider.
+#if defined (__TOUCH_END_SLIDERBAR)        
+        [slider setTouchEndSelector:@selector(sliderTouchEnd)];
+#endif
 	}
 	return self;
 }
