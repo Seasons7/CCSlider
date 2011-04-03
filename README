@@ -6,11 +6,11 @@ You can use easy!
 >>>>
 - (void) sliderMessage : (id)sender {
             
-            CCSliderThumb *thumb = (CCSliderThumb *)sender;
-            CCLOG(@"%f" , thumb.value );
-    
-            CCNode *node = [self getChildByTag:kTagSlider];
-            CCSlider *slider = (CCSlider *)node;
+  CCSliderThumb *thumb = (CCSliderThumb *)sender;
+  CCLOG(@"%f" , thumb.value );
+
+  CCNode *node = [self getChildByTag:kTagSlider];
+  CCSlider *slider = (CCSlider *)node;
     
 #if defined (__CLIPPING_SLIDERBAR)
     [slider clippingBar:CGSizeMake(thumb.value * slider.barImage.contentSize.width,
@@ -19,7 +19,7 @@ You can use easy!
 
 - (void) sliderTouchEnd {
     
-    CCLOG(@"sliderTouchEnd");
+  CCLOG(@"sliderTouchEnd");
 }
 <<<<
 
