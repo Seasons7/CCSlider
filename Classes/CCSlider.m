@@ -8,8 +8,9 @@
 //
 
 #import "CCSlider.h"
+#import "CCNodeClipping.h"
 
-static const int _max = 200;
+static const int _max = 200; // bar.png Image Width
 
 @implementation CCSliderThumb
 
@@ -44,10 +45,13 @@ static const int _max = 200;
 {
 	CCSliderThumb* _thumb;
 	BOOL _liveDragging;
+    id  _target;
+    SEL _endSelector;
 }
 
 @property (readonly) CCSliderThumb* thumb;
 @property (readwrite, assign) BOOL liveDragging;
+@property (readwrite) SEL endSelector;
 
 -(id) initWithTarget:(id)t selector:(SEL)sel;
 
@@ -56,7 +60,7 @@ static const int _max = 200;
 
 @implementation CCSliderTouchLogic
 
-@synthesize liveDragging = _liveDragging;
+@synthesize liveDragging = _liveDragging , endSelector = _endSelector;
 
 -(id) init
 {
@@ -68,7 +72,7 @@ static const int _max = 200;
 	if( (self = [super initWithItems:nil vaList:nil]) ) {
 		
 		self.position = ccp(0,0);
-		
+		_target = t;
 		_liveDragging = NO;
 		_thumb = [[[CCSliderThumb alloc] initWithTarget:t selector:sel] autorelease];
 		if( _thumb ) {
@@ -96,6 +100,8 @@ static const int _max = 200;
 
 -(void) ccTouchEnded:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    if( _endSelector != nil )
+        [_target performSelector:_endSelector withObject:nil];
 	[super ccTouchEnded:touch withEvent:event];
 }
 
@@ -104,7 +110,7 @@ static const int _max = 200;
 	CGPoint pt = [self convertTouchToNodeSpace:touch];
 	
 	float x = pt.x;
-	
+    
 	if (x < -_max/2)
 		_thumb.position = ccp(-_max/2, 0);
 	else if (x > _max/2)
@@ -126,7 +132,12 @@ static const int _max = 200;
 
 @implementation CCSlider
 
-@synthesize barImage = barImage_;
+@dynamic barImage;
+
+- (void) setTouchEnabled : (BOOL)enable {
+ 
+    [_touchLogic setIsTouchEnabled:enable];
+}
 
 + (id) sliderWithTarget:(id)t selector:(SEL)sel {
 
@@ -138,6 +149,11 @@ static const int _max = 200;
 	return [self initWithTarget:nil selector:nil];
 }
 
+- (void) setTouchEndSelector : (SEL)sel {
+    
+    _touchLogic.endSelector = sel;
+}
+
 -(id) initWithTarget:(id)t selector:(SEL)sel
 {
 	if( (self = [super init]) ) {
@@ -146,23 +162,50 @@ static const int _max = 200;
 						initWithTarget:t 
 						selector:sel] autorelease];
 		if( _touchLogic ) {
+			CCNodeClipping *node = [CCNodeClipping node];
+			node.position = CGPointMake(0, 0);
 			barImage_ = [CCSprite spriteWithFile:@"slidergroove.png"];
-			[self addChild:barImage_ z:1];
-			[self addChild:_touchLogic z:2];
+			[node setClippingRegion:CGRectMake(self.position.x - barImage_.contentSize.width/2,
+											   self.position.y - barImage_.contentSize.height/2,
+											   barImage_.contentSize.width,
+											   barImage_.contentSize.height)];
+			
+			[node addChild:barImage_ z:1 tag:0x2];
+			[self addChild:node z:2 tag:0x2];
+			[self addChild:_touchLogic z:3];
 		}
 	}
 	return self;
+}
+
+- (void) clippingBar : (CGSize)size {
+	
+	CCNodeClipping *node = (CCNodeClipping *)[self getChildByTag:0x2];
+	[node setClippingRegion:CGRectMake(self.position.x - barImage_.contentSize.width/2,
+									   self.position.y - barImage_.contentSize.height/2,
+									   size.width,
+									   size.height)];
 }
 
 - (void) setBarImage:(CCSprite *)image {
 
 	if( image != barImage_ ) {
 		
-		[self removeChild:barImage_ cleanup:YES];
-		[self addChild:image z:1];
+		CCNodeClipping *node = (CCNodeClipping *)[self getChildByTag:0x2];
+		CCSprite *sp = (CCSprite *)[node getChildByTag:0x2];
+		[sp removeFromParentAndCleanup:YES];
+		[node addChild:image];
 		
 		barImage_ = image;
+		[node setClippingRegion:CGRectMake(self.position.x - barImage_.contentSize.width/2,
+										   self.position.y - barImage_.contentSize.height/2,
+										   barImage_.contentSize.width,
+										   barImage_.contentSize.height)];
 	}
+}
+
+- (CCSprite *) barImage {
+    return barImage_;
 }
 
 -(CCSliderThumb*) thumb

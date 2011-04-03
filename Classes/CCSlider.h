@@ -29,12 +29,16 @@
 }
 
 @property (readonly) CCSliderThumb* thumb;
-@property (readwrite, assign) CCSprite *barImage;
-@property (readwrite, assign) float value;
-@property (readwrite, assign) BOOL liveDragging;
+@property (nonatomic,retain) CCSprite *barImage;
+@property (readwrite) float value;
+@property (readwrite) BOOL liveDragging;
 
 - (id) initWithTarget:(id)t selector:(SEL)sel;
 + (id) sliderWithTarget:(id)t selector:(SEL)sel;
+- (void) clippingBar : (CGSize)size;
+- (void) setTouchEndSelector : (SEL)sel;
+
+- (void) setTouchEnabled : (BOOL)enable;
 
 @end
 
