@@ -5,9 +5,21 @@ You can use easy!
 
 >>>>
 - (void) sliderMessage : (id)sender {
-	
-	CCSliderThumb *slider = (CCSliderThumb *)sender;
-	CCLOG(@"%f" , slider.value );
+            
+            CCSliderThumb *thumb = (CCSliderThumb *)sender;
+            CCLOG(@"%f" , thumb.value );
+    
+            CCNode *node = [self getChildByTag:kTagSlider];
+            CCSlider *slider = (CCSlider *)node;
+    
+#if defined (__CLIPPING_SLIDERBAR)
+    [slider clippingBar:CGSizeMake(thumb.value * slider.barImage.contentSize.width,
+                                   slider.barImage.contentSize.height)];
+#endif}
+
+- (void) sliderTouchEnd {
+    
+    CCLOG(@"sliderTouchEnd");
 }
 <<<<
 
@@ -17,13 +29,24 @@ CCSlider *slider = [CCSlider sliderWithTarget:self selector:@selector(sliderMess
 slider.position = ccp( 200 , 200 );
 slider.liveDragging = YES;
 
-// You can use custom slider image.
-/*
-slider.thumb.selectedImage = [CCSprite spriteWithFile:@"slider_thumb.png"];
-slider.thumb.normalImage   = [CCSprite spriteWithFile:@"slider_thumb.png"];
-slider.barImage = [CCSprite spriteWithFile:@"slider_bar.png"];
-*/
+// You can use custom image
+/* --- This is sample code --- */
+slider.thumb.selectedImage = [CCSprite spriteWithFile:@"thumb.png"];
+slider.thumb.normalImage   = [CCSprite spriteWithFile:@"thumb.png"];
+slider.thumb.contentSize   = slider.thumb.selectedImage.contentSize;
+slider.thumb.contentSizeInPixels = slider.thumb.selectedImage.contentSizeInPixels;
+slider.barImage = [CCSprite spriteWithFile:@"bar.png"];
+/* --- This is sample code --- */
+
+slider.tag = kTagSlider;
 [self addChild:slider];
+        
+// If you use setTouchEndSelector method, 
+// you can call specific selector when 
+// you release your finger from the slider.
+#if defined (__TOUCH_END_SLIDERBAR)        
+        [slider setTouchEndSelector:@selector(sliderTouchEnd)];
+#endif
 <<<<
 
 Thanks
